@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         const { error: insertError } = await admin.from('editor_credentials').insert({
           username: envUser,
           password_hash,
-        });
+        } as never);
         if (insertError) {
           return NextResponse.json({ error: 'Failed to save credentials' }, { status: 500 });
         }
