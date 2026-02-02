@@ -59,9 +59,9 @@ export function VantaTopologyBg() {
           minWidth: 200.0,
           scale: 1.0,
           scaleMobile: 1.0,
-          speed: 3.5,
+          speed: 7,
           backgroundColor: 0x222222,
-          color: 0x2563eb, /* blue instead of green */
+          color: 0x2563eb,
         });
       } catch (err) {
         console.error('Vanta TOPOLOGY init error:', err);
