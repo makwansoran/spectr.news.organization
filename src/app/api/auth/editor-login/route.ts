@@ -33,10 +33,25 @@ export async function POST(request: Request) {
     const row = data as EditorCredsRow | null;
 
     if (fetchError) {
+      // Fallback: when DB table is missing/unreachable, use env vars so login still works
+      const envUser = process.env.EDITOR_USERNAME;
+      const envPass = process.env.EDITOR_PASSWORD;
+      if (envUser && envPass && username === envUser && password === envPass) {
+        const { value, maxAge } = await createEditorSession();
+        const res = NextResponse.json({ ok: true, redirect: '/admin' });
+        res.cookies.set(EDITOR_COOKIE_NAME, value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge,
+          path: '/',
+        });
+        return res;
+      }
       return NextResponse.json(
         {
           error:
-            'Database error: editor_credentials table missing or unreachable. Open Supabase → SQL Editor, run the contents of supabase/migrations/SEED_EDITOR_RUN_IN_SUPABASE.sql (creates table + editor / globalist2024), then try again.',
+            'Database error: editor_credentials table missing or unreachable. Set EDITOR_USERNAME and EDITOR_PASSWORD in Vercel env vars to log in without the table, or run SEED_EDITOR_RUN_IN_SUPABASE.sql in Supabase SQL Editor.',
         },
         { status: 500 }
       );
