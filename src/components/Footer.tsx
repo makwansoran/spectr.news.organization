@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ConsentRevocationLink } from '@/components/ConsentRevocationLink';
 
 export function Footer() {
   return (
@@ -15,6 +16,7 @@ export function Footer() {
             <Link href="/companies" className="hover:text-bloomberg-blue">Companies</Link>
             <Link href="/subscribe" className="hover:text-bloomberg-blue">Subscribe</Link>
             <Link href="/admin" className="hover:text-bloomberg-blue">Editor&apos;s Desk</Link>
+            <ConsentRevocationLink className="inline" />
           </nav>
         </div>
         <p className="mt-4 text-xs text-globalist-gray-600">

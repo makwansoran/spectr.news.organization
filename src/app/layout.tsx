@@ -32,8 +32,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${publicSans.variable} ${cormorant.variable}`}>
       <head>
+        {/* Referrer policy: required for Google CMP / European consent messages */}
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
         {/* AdSense verification: meta tag + script in head so Google crawler can verify */}
         <meta name="google-adsense-account" content="ca-pub-8659207565346557" />
+        {/* Google CMP: init before AdSense so European consent message can show (EEA/UK/CH) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+window.googlefc = window.googlefc || {};
+window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+`,
+          }}
+        />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8659207565346557"
