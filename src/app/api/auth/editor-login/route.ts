@@ -33,7 +33,14 @@ export async function POST(request: Request) {
     const row = data as EditorCredsRow | null;
 
     if (fetchError) {
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      const msg = fetchError.message || '';
+      const hint = msg.includes('does not exist') || msg.includes('relation')
+        ? ' Run supabase/migrations/SEED_EDITOR_RUN_IN_SUPABASE.sql in Supabase SQL Editor to create the editor_credentials table and seed editor / globalist2024.'
+        : '';
+      return NextResponse.json(
+        { error: 'Database error.' + hint, details: process.env.NODE_ENV === 'development' ? msg : undefined },
+        { status: 500 }
+      );
     }
 
     // No row: one-time migrate from env if set
