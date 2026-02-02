@@ -71,7 +71,7 @@ export default async function HomePage() {
       {/* Bottom: Editor Choice (3 cards) left + Worth Reading (list) right */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-7">
-          <EditorChoice articles={editorChoice.length >= 3 ? editorChoice : homepageArticles} />
+          <EditorChoice articles={editorChoice} />
         </div>
         <aside className="mt-8 lg:col-span-5 lg:mt-0">
           <WorthReading articles={worthReading} />
