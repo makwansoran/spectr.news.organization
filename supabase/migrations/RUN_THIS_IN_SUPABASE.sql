@@ -47,3 +47,13 @@ alter table public.articles add column if not exists author_email text;
 alter table public.articles add column if not exists author_position text;
 alter table public.articles add column if not exists homepage_section text;
 create index if not exists idx_articles_homepage_section on public.articles (homepage_section) where homepage_section is not null;
+
+-- 3. Editor's Desk login (stored in DB; app hashes password with bcrypt)
+create table if not exists public.editor_credentials (
+  id uuid primary key default gen_random_uuid(),
+  username text not null unique,
+  password_hash text not null,
+  updated_at timestamptz default now() not null
+);
+alter table public.editor_credentials enable row level security;
+-- No policies: only service_role (API) can read/write; anon/authenticated cannot access.

@@ -1,21 +1,60 @@
 import { NextResponse } from 'next/server';
+import { compare, hash } from 'bcryptjs';
 import { createEditorSession, EDITOR_COOKIE_NAME } from '@/lib/auth';
+import { getSupabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { username, password } = body;
-    const expectedUsername = process.env.EDITOR_USERNAME;
-    const expectedPassword = process.env.EDITOR_PASSWORD;
 
-    if (!expectedUsername || !expectedPassword) {
+    if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+      return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
+    }
+
+    const admin = getSupabaseAdmin();
+    const { data: row, error: fetchError } = await admin
+      .from('editor_credentials')
+      .select('username, password_hash')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (fetchError) {
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    }
+
+    // No row: one-time migrate from env if set
+    if (!row) {
+      const envUser = process.env.EDITOR_USERNAME;
+      const envPass = process.env.EDITOR_PASSWORD;
+      if (envUser && envPass && username === envUser && password === envPass) {
+        const password_hash = await hash(password, 10);
+        const { error: insertError } = await admin.from('editor_credentials').insert({
+          username: envUser,
+          password_hash,
+        });
+        if (insertError) {
+          return NextResponse.json({ error: 'Failed to save credentials' }, { status: 500 });
+        }
+        const { value, maxAge } = await createEditorSession();
+        const res = NextResponse.json({ ok: true, redirect: '/admin' });
+        res.cookies.set(EDITOR_COOKIE_NAME, value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge,
+          path: '/',
+        });
+        return res;
+      }
       return NextResponse.json(
-        { error: 'Editor login is not configured. Set EDITOR_USERNAME and EDITOR_PASSWORD in .env.local.' },
+        { error: 'Editor login is not configured. Add a row to editor_credentials in the database, or set EDITOR_USERNAME and EDITOR_PASSWORD in .env.local once to create it.' },
         { status: 503 }
       );
     }
 
-    if (!username || !password || username !== expectedUsername || password !== expectedPassword) {
+    const match = await compare(password, row.password_hash);
+    if (!match) {
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
 

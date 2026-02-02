@@ -61,6 +61,11 @@ export interface Database {
         };
         Update: Partial<Database['public']['Tables']['articles']['Insert']>;
       };
+      editor_credentials: {
+        Row: { id: string; username: string; password_hash: string; updated_at: string };
+        Insert: { id?: string; username: string; password_hash: string; updated_at?: string };
+        Update: Partial<{ username: string; password_hash: string; updated_at: string }>;
+      };
     };
   };
 }
