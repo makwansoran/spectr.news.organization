@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import { Public_Sans } from 'next/font/google';
 import { Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
@@ -20,6 +19,9 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: 'spectr | News, Politics, Finance & Economy',
   description: 'Global news, analysis, and data. Politics, finance, economy, and companies.',
+  other: {
+    'google-adsense-account': 'ca-pub-8659207565346557',
+  },
 };
 
 export default function RootLayout({
@@ -29,13 +31,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${publicSans.variable} ${cormorant.variable}`}>
-      <body className="min-h-screen flex flex-col bg-globalist-white font-sans text-globalist-black">
-        {/* AdSense: in head via beforeInteractive so Google can verify the site */}
-        <Script
+      <head>
+        {/* AdSense verification: meta tag + script in head so Google crawler can verify */}
+        <meta name="google-adsense-account" content="ca-pub-8659207565346557" />
+        <script
+          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8659207565346557"
-          strategy="beforeInteractive"
           crossOrigin="anonymous"
-        />
+        ></script>
+      </head>
+      <body className="min-h-screen flex flex-col bg-globalist-white font-sans text-globalist-black">
         {children}
       </body>
     </html>
