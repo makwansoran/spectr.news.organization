@@ -78,7 +78,7 @@ export default function AdminNewArticlePage() {
       setAuthorAvatarUrl('');
       setIsBreaking(false);
       setIsPremium(false);
-      setShowOnHomepage(false);
+      setHomepageSection('');
     } catch (err) {
       setStatus('error');
       setMessage(err instanceof Error ? err.message : 'Network error');

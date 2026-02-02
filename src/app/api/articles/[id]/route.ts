@@ -35,7 +35,7 @@ export async function PATCH(
     const admin = getSupabaseAdmin();
     const { data, error } = await admin
       .from('articles')
-      .update(updates)
+      .update(updates as never)
       .eq('id', id)
       .select('id, show_on_homepage, homepage_section')
       .single();

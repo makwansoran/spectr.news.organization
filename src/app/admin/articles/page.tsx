@@ -63,6 +63,24 @@ export default function AdminArticlesPage() {
     }
   };
 
+  const toggleHomepage = async (id: string, currentShow: boolean) => {
+    setTogglingId(id);
+    try {
+      const res = await fetch(`/api/articles/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ show_on_homepage: !currentShow }),
+      });
+      if (res.ok) {
+        setArticles((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, show_on_homepage: !currentShow, homepage_section: !currentShow ? null : a.homepage_section } : a))
+        );
+      }
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const bySection = HOMEPAGE_SECTIONS.filter((x) => x.value).map(({ value, label }) => ({
     value,
     label,

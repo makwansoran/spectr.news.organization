@@ -4,6 +4,15 @@ import type { Category, Database } from '@/types';
 
 type ArticleInsert = Database['public']['Tables']['articles']['Insert'];
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'article';
+}
+
 export async function POST(request: Request) {
   try {
     const payload = await request.json();
@@ -35,15 +44,6 @@ export async function POST(request: Request) {
     const validCategories: Category[] = ['politics', 'finance', 'economy', 'companies', 'breaking'];
     if (!validCategories.includes(category)) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
-    }
-
-    function slugify(text: string): string {
-      return text
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '') || 'article';
     }
 
     const admin = getSupabaseAdmin();
