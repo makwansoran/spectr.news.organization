@@ -12,7 +12,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
     }
 
-    const admin = getSupabaseAdmin();
+    let admin;
+    try {
+      admin = getSupabaseAdmin();
+    } catch {
+      return NextResponse.json(
+        { error: 'Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in environment.' },
+        { status: 503 }
+      );
+    }
+
     const { data: row, error: fetchError } = await admin
       .from('editor_credentials')
       .select('username, password_hash')
@@ -48,7 +57,7 @@ export async function POST(request: Request) {
         return res;
       }
       return NextResponse.json(
-        { error: 'Editor login is not configured. Add a row to editor_credentials in the database, or set EDITOR_USERNAME and EDITOR_PASSWORD in .env.local once to create it.' },
+        { error: 'Editor login is not configured. Run supabase/migrations/SEED_EDITOR_RUN_IN_SUPABASE.sql in Supabase SQL Editor (creates editor / globalist2024), or set EDITOR_USERNAME and EDITOR_PASSWORD in env once to create the row.' },
         { status: 503 }
       );
     }
