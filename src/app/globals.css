@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bloomberg-blue: #0000ff;
+  --globalist-black: #000000;
+  --globalist-white: #ffffff;
+  --font-serif: var(--font-cormorant), Georgia, Cambria, 'Times New Roman', serif;
+}
+
+body {
+  @apply bg-globalist-white text-globalist-black antialiased;
+  font-family: var(--font-serif);
+}
+
+/* High-contrast link styling */
+a.text-bloomberg {
+  @apply text-bloomberg-blue hover:underline hover:text-bloomberg-blueDark;
+}
+
+/* Dense, data-driven borders */
+.border-bloomberg {
+  border-color: var(--bloomberg-blue);
+}
+
+/* Reading view typography */
+.prose-globalist {
+  @apply text-globalist-gray-900 leading-relaxed;
+}
+
+.prose-globalist h1,
+.prose-globalist h2,
+.prose-globalist h3 {
+  @apply font-semibold text-globalist-black;
+}
+
+.prose-globalist a {
+  @apply text-bloomberg-blue underline;
+}
+
+/* Bento card */
+.bento-card {
+  @apply border border-globalist-gray-200 bg-globalist-white;
+}
+
+/* Quill editor overrides for admin */
+.ql-editor {
+  min-height: 280px;
+  font-family: var(--font-sans);
+}
+
+/* Sign-in inputs: clear, tall, readable */
+.input-signin {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #171717;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-signin::placeholder {
+  color: #a3a3a3;
+}
+.input-signin:hover {
+  border-color: #d4d4d4;
+}
+.input-signin:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+@keyframes text-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.text-shimmer-white {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ffffff 30%,
+    #d4d4d4 45%,
+    #a3a3a3 50%,
+    #d4d4d4 55%,
+    #ffffff 70%,
+    #ffffff 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-shimmer 3.5s ease-in-out infinite;
+}
