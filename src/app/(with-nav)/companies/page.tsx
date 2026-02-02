@@ -4,8 +4,8 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { AdSlot } from '@/components/AdSlot';
 
 export const metadata = {
-  title: 'Companies | Spectr',
-  description: 'Company and business news from Spectr.',
+  title: 'Companies | spectr',
+  description: 'Company and business news from spectr.',
 };
 
 export default async function CompaniesPage() {

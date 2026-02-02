@@ -58,7 +58,7 @@ function LoginForm() {
       </div>
 
       <Link href="/" className="absolute top-6 left-6 z-10 text-xl font-semibold tracking-tight text-white hover:opacity-90 transition-opacity">
-        Spectr
+        spectr
       </Link>
 
       <main className="relative z-10 flex-1 flex items-center justify-center px-6 py-12 min-h-screen">

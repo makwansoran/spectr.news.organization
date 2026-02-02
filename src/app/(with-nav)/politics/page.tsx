@@ -4,8 +4,8 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { AdSlot } from '@/components/AdSlot';
 
 export const metadata = {
-  title: 'Politics | Spectr',
-  description: 'Politics news and analysis from Spectr.',
+  title: 'Politics | spectr',
+  description: 'Politics news and analysis from spectr.',
 };
 
 export default async function PoliticsPage() {

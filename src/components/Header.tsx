@@ -50,8 +50,8 @@ export function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <Link href="/" className="font-logo text-xl font-bold text-white sm:text-2xl">
-            Spectr
+          <Link href="/" className="text-xl font-semibold text-white sm:text-2xl hover:text-globalist-gray-200">
+            spectr
           </Link>
         </div>
         <div className="flex items-center gap-2">

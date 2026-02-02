@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Public_Sans } from 'next/font/google';
 import { Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
@@ -17,7 +18,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'Spectr | News, Politics, Finance & Economy',
+  title: 'spectr | News, Politics, Finance & Economy',
   description: 'Global news, analysis, and data. Politics, finance, economy, and companies.',
 };
 
@@ -29,6 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${publicSans.variable} ${cormorant.variable}`}>
       <body className="min-h-screen flex flex-col bg-globalist-white font-sans text-globalist-black">
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8659207565346557"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
         {children}
       </body>
     </html>

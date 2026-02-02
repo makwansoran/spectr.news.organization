@@ -6,6 +6,7 @@ import { BreakingLarge } from '@/components/home/BreakingLarge';
 import { PopularGrid } from '@/components/home/PopularGrid';
 import { EditorChoice } from '@/components/home/EditorChoice';
 import { WorthReading } from '@/components/home/WorthReading';
+import { LatestSection } from '@/components/home/LatestSection';
 import { AdSlot } from '@/components/AdSlot';
 import type { Article } from '@/types';
 
@@ -17,15 +18,17 @@ export default async function HomePage() {
   let popular: Article[] = [];
   let editorChoice: Article[] = [];
   let worthReading: Article[] = [];
+  let latest: Article[] = [];
 
   try {
-    const [featuredRes, breakingRes, trendingRes, popularRes, editorChoiceRes, worthReadingRes] = await Promise.all([
+    const [featuredRes, breakingRes, trendingRes, popularRes, editorChoiceRes, worthReadingRes, latestRes] = await Promise.all([
       getArticles({ homepageSection: 'featured', limit: 1 }),
       getArticles({ homepageSection: 'breaking', limit: 10 }),
       getArticles({ homepageSection: 'trending', limit: 4 }),
       getArticles({ homepageSection: 'popular', limit: 4 }),
       getArticles({ homepageSection: 'editor_choice', limit: 3 }),
       getArticles({ homepageSection: 'worth_reading', limit: 5 }),
+      getArticles({ limit: 12 }),
     ]);
     featured = featuredRes[0];
     breakingList = breakingRes;
@@ -34,6 +37,7 @@ export default async function HomePage() {
     popular = popularRes;
     editorChoice = editorChoiceRes;
     worthReading = worthReadingRes;
+    latest = latestRes;
   } catch {
     // show empty when API fails
   }
@@ -77,6 +81,9 @@ export default async function HomePage() {
           <WorthReading articles={worthReading} />
         </aside>
       </section>
+
+      {/* Latest: all recent articles (so your posts always show) */}
+      <LatestSection articles={latest} />
     </div>
   );
 }

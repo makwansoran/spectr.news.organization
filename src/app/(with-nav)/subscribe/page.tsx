@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Subscribe | Spectr',
+  title: 'Subscribe | spectr',
   description: 'Choose a plan. Monthly, Yearly, or Corporate.',
 };
 
@@ -15,7 +15,7 @@ export default function SubscribePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <header className="text-center">
-        <h1 className="text-3xl font-bold text-globalist-black md:text-4xl">Subscribe to Spectr</h1>
+        <h1 className="text-3xl font-bold text-globalist-black md:text-4xl">Subscribe to spectr</h1>
         <p className="mx-auto mt-2 max-w-xl text-globalist-gray-600">Unlock full access. Paywall-protected content for subscribers only.</p>
       </header>
       <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">

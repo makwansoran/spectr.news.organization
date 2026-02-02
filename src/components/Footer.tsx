@@ -5,8 +5,8 @@ export function Footer() {
     <footer className="mt-auto border-t border-globalist-gray-200 bg-globalist-gray-100 py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Link href="/" className="font-logo text-xl font-bold text-globalist-black sm:text-2xl hover:text-bloomberg-blue">
-            Spectr
+          <Link href="/" className="text-xl font-semibold text-globalist-black sm:text-2xl hover:text-bloomberg-blue">
+            spectr
           </Link>
           <nav className="flex flex-wrap items-center gap-6 text-sm text-globalist-gray-600">
             <Link href="/politics" className="hover:text-bloomberg-blue">Politics</Link>
@@ -18,7 +18,7 @@ export function Footer() {
           </nav>
         </div>
         <p className="mt-4 text-xs text-globalist-gray-600">
-          © {new Date().getFullYear()} Spectr. All voices matter.
+          © {new Date().getFullYear()} spectr. All voices matter.
         </p>
       </div>
     </footer>

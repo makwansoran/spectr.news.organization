@@ -11,7 +11,7 @@ import { MarketTable } from '@/components/markets/MarketTable';
 import { AdSlot } from '@/components/AdSlot';
 
 export const metadata = {
-  title: 'Markets | Spectr',
+  title: 'Markets | spectr',
   description: 'Stock indices, equities, crypto, forex, commodities, and bonds. Real-time market data.',
 };
 

@@ -4,8 +4,8 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { AdSlot } from '@/components/AdSlot';
 
 export const metadata = {
-  title: 'Finance | Spectr',
-  description: 'Finance and markets news from Spectr.',
+  title: 'Finance | spectr',
+  description: 'Finance and markets news from spectr.',
 };
 
 export default async function FinancePage() {
