@@ -42,8 +42,8 @@ export async function POST(request: Request) {
       const envPass = process.env.EDITOR_PASSWORD;
       if (envUser && envPass && username === envUser && password === envPass) {
         const password_hash = await hash(password, 10);
-        // @ts-expect-error Supabase insert type for editor_credentials is inferred as never
-        const { error: insertError } = await admin.from('editor_credentials').insert({ username: envUser, password_hash });
+        const insertPayload = { username: envUser, password_hash };
+        const { error: insertError } = await admin.from('editor_credentials').insert(insertPayload as never);
         if (insertError) {
           return NextResponse.json({ error: 'Failed to save credentials' }, { status: 500 });
         }
