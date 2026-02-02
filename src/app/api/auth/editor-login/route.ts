@@ -3,6 +3,8 @@ import { compare, hash } from 'bcryptjs';
 import { createEditorSession, EDITOR_COOKIE_NAME } from '@/lib/auth';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
+type EditorCredsRow = { username: string; password_hash: string };
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -22,11 +24,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: row, error: fetchError } = await admin
+    const { data, error: fetchError } = await admin
       .from('editor_credentials')
       .select('username, password_hash')
       .eq('username', username)
       .maybeSingle();
+
+    const row = data as EditorCredsRow | null;
 
     if (fetchError) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
@@ -38,10 +42,8 @@ export async function POST(request: Request) {
       const envPass = process.env.EDITOR_PASSWORD;
       if (envUser && envPass && username === envUser && password === envPass) {
         const password_hash = await hash(password, 10);
-        const { error: insertError } = await admin.from('editor_credentials').insert({
-          username: envUser,
-          password_hash,
-        } as never);
+        // @ts-expect-error Supabase insert type for editor_credentials is inferred as never
+        const { error: insertError } = await admin.from('editor_credentials').insert({ username: envUser, password_hash });
         if (insertError) {
           return NextResponse.json({ error: 'Failed to save credentials' }, { status: 500 });
         }

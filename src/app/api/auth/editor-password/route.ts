@@ -3,6 +3,8 @@ import { compare, hash } from 'bcryptjs';
 import { verifyEditorSession, getEditorSessionCookie } from '@/lib/auth';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
+type EditorCredsRow = { id: string; password_hash: string };
+
 /** Change editor password. Requires valid editor session. */
 export async function POST(request: Request) {
   try {
@@ -23,12 +25,13 @@ export async function POST(request: Request) {
     }
 
     const admin = getSupabaseAdmin();
-    const { data: row, error: fetchError } = await admin
+    const { data, error: fetchError } = await admin
       .from('editor_credentials')
       .select('id, password_hash')
       .limit(1)
       .single();
 
+    const row = data as EditorCredsRow | null;
     if (fetchError || !row) {
       return NextResponse.json({ error: 'No editor credentials in database' }, { status: 503 });
     }
@@ -39,9 +42,10 @@ export async function POST(request: Request) {
     }
 
     const password_hash = await hash(newPassword, 10);
+    const updates = { password_hash, updated_at: new Date().toISOString() };
     const { error: updateError } = await admin
       .from('editor_credentials')
-      .update({ password_hash, updated_at: new Date().toISOString() })
+      .update(updates as never)
       .eq('id', row.id);
 
     if (updateError) {
