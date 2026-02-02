@@ -30,9 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${publicSans.variable} ${cormorant.variable}`}>
       <body className="min-h-screen flex flex-col bg-globalist-white font-sans text-globalist-black">
+        {/* AdSense: in head via beforeInteractive so Google can verify the site */}
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8659207565346557"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           crossOrigin="anonymous"
         />
         {children}
