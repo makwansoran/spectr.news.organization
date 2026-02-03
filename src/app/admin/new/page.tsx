@@ -162,20 +162,25 @@ export default function AdminNewArticlePage() {
             Featured image
           </label>
           <p className="mt-1 text-xs text-globalist-gray-500">
-            Upload an image from your computer (JPEG, PNG, GIF, WebP, max 5MB).
+            JPEG, PNG, GIF, WebP, SVG, BMP, AVIF, TIFF, ICO — max 10MB.
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-4">
             <label className="cursor-pointer rounded border border-globalist-gray-300 bg-white px-3 py-2 text-sm font-medium text-globalist-gray-700 hover:bg-globalist-gray-50 focus-within:ring-2 focus-within:ring-bloomberg-blue">
               {uploading ? 'Uploading…' : 'Upload image'}
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
+                accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/bmp,image/avif,image/tiff,image/x-icon,image/vnd.microsoft.icon"
                 className="sr-only"
                 disabled={uploading}
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
                   if (!f) return;
                   setUploadError('');
+                  if (f.size > 10 * 1024 * 1024) {
+                    setUploadError('File too large. Maximum size is 10MB.');
+                    e.target.value = '';
+                    return;
+                  }
                   setUploading(true);
                   try {
                     const form = new FormData();
@@ -259,17 +264,22 @@ export default function AdminNewArticlePage() {
               className="flex-1 min-w-0 rounded border border-globalist-gray-300 px-3 py-2 text-globalist-black focus:border-bloomberg-blue focus:outline-none focus:ring-1 focus:ring-bloomberg-blue"
               placeholder="https://... or upload"
             />
-            <label className="cursor-pointer rounded border border-globalist-gray-300 bg-white px-3 py-2 text-sm font-medium text-globalist-gray-700 hover:bg-globalist-gray-50">
+            <label className="cursor-pointer rounded border border-globalist-gray-300 bg-white px-3 py-2 text-sm font-medium text-globalist-gray-700 hover:bg-globalist-gray-50 focus-within:ring-2 focus-within:ring-bloomberg-blue">
               {authorAvatarUploading ? 'Uploading…' : 'Upload'}
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
+                accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/bmp,image/avif,image/tiff,image/x-icon,image/vnd.microsoft.icon"
                 className="sr-only"
                 disabled={authorAvatarUploading}
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
                   if (!f) return;
                   setAuthorAvatarError('');
+                  if (f.size > 10 * 1024 * 1024) {
+                    setAuthorAvatarError('File too large. Maximum size is 10MB.');
+                    e.target.value = '';
+                    return;
+                  }
                   setAuthorAvatarUploading(true);
                   try {
                     const form = new FormData();
