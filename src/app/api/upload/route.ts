@@ -5,6 +5,9 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
+// Must run in Node (Buffer, fs). Edge would break upload.
+export const runtime = 'nodejs';
+
 // Vercel serverless request body limit is 4.5MB — keep under that
 const MAX_SIZE = 4 * 1024 * 1024; // 4MB
 const BUCKET = 'uploads';
@@ -118,7 +121,9 @@ export async function POST(request: Request) {
         upsert: false,
       };
 
-      let result = await supabase.storage.from(BUCKET).upload(filename, buffer, opts);
+      // Supabase storage-js accepts Buffer (Node) or Uint8Array
+      const body = new Uint8Array(buffer);
+      let result = await supabase.storage.from(BUCKET).upload(filename, body, opts);
       let { data, error } = result;
 
       if (error) {
@@ -128,7 +133,7 @@ export async function POST(request: Request) {
           error.message?.toLowerCase().includes('could not find');
         if (isBucketMissing) {
           await supabase.storage.createBucket(BUCKET, { public: true });
-          result = await supabase.storage.from(BUCKET).upload(filename, buffer, opts);
+          result = await supabase.storage.from(BUCKET).upload(filename, body, opts);
           data = result.data;
           error = result.error;
         }
@@ -137,9 +142,13 @@ export async function POST(request: Request) {
       if (error) {
         console.error('Upload: storage upload failed', error);
         const msg = error.message || 'Upload failed';
-        const hint = msg.toLowerCase().includes('row-level security') || msg.toLowerCase().includes('policy')
-          ? ' Run the SQL in Supabase Dashboard → SQL Editor: supabase/migrations/009_storage_uploads_policy.sql'
-          : '';
+        const lower = msg.toLowerCase();
+        let hint = '';
+        if (lower.includes('row-level security') || lower.includes('policy')) {
+          hint = ' Run the SQL in Supabase Dashboard → SQL Editor: supabase/migrations/009_storage_uploads_policy.sql';
+        } else if (lower.includes('method not allowed') || lower.includes('405')) {
+          hint = ' In Supabase: Storage → uploads bucket → ensure bucket is public and run 009_storage_uploads_policy.sql in SQL Editor.';
+        }
         return NextResponse.json(
           { error: msg + hint },
           { status: 500 }
@@ -167,11 +176,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: `/uploads/${filename}` });
   } catch (e) {
     console.error('Upload error', e);
+    const msg = e instanceof Error ? e.message : 'Upload failed';
+    const hint = msg.toLowerCase().includes('method not allowed')
+      ? ' Supabase Storage may be blocking uploads: run 009_storage_uploads_policy.sql in Supabase SQL Editor and ensure bucket "uploads" is public.'
+      : '';
     return NextResponse.json(
-      {
-        error:
-          e instanceof Error ? e.message : 'Upload failed. Try again or use a smaller image.',
-      },
+      { error: msg + hint },
       { status: 500 }
     );
   }

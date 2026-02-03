@@ -2,6 +2,11 @@
 
 Every push to **master** should deploy to Vercel. Use one of these:
 
+---
+
+**If article image upload fails with "Method Not allowed" or 500:**  
+Run the Storage policy in Supabase: **Dashboard → SQL Editor** → paste and run the contents of `supabase/migrations/009_storage_uploads_policy.sql`. Ensure the bucket is named **uploads** (lowercase) and is **public**.
+
 ## 1. Vercel Git (recommended)
 
 1. Open [Vercel Dashboard](https://vercel.com/dashboard) → your project (or create one).
