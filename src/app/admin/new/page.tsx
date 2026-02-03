@@ -470,13 +470,16 @@ export default function AdminNewArticlePage() {
         </div>
 
         {message && (
-          <p
-            className={`text-sm ${
-              status === 'success' ? 'text-green-600' : 'text-red-600'
+          <div
+            role="alert"
+            className={`rounded border p-4 text-sm ${
+              status === 'success'
+                ? 'border-green-200 bg-green-50 text-green-800'
+                : 'border-red-200 bg-red-50 text-red-800'
             }`}
           >
             {message}
-          </p>
+          </div>
         )}
 
         <button

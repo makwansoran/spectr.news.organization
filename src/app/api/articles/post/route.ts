@@ -4,6 +4,8 @@ import { verifyEditorSession, EDITOR_COOKIE_NAME } from '@/lib/auth';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import type { Category, Database } from '@/types';
 
+export const runtime = 'nodejs';
+
 type ArticleInsert = Database['public']['Tables']['articles']['Insert'];
 
 async function requireEditor() {
@@ -32,14 +34,17 @@ export async function POST(request: Request) {
   if (authErr) return authErr;
 
   try {
-    const payload = await request.json();
+    const payload = await request.json().catch(() => ({}));
+    if (!payload || typeof payload !== 'object') {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
     const {
-      title,
+      title: titleIn,
       slug,
       subheadline,
-      category,
+      category: categoryIn,
       excerpt,
-      body,
+      body: bodyIn,
       featured_image_url,
       author_name,
       author_avatar_url,
@@ -50,6 +55,10 @@ export async function POST(request: Request) {
       show_on_homepage,
       homepage_section,
     } = payload;
+
+    const title = titleIn != null ? String(titleIn).trim() : '';
+    const category = categoryIn != null ? String(categoryIn).trim() : '';
+    const body = bodyIn != null ? String(bodyIn) : '';
 
     if (!title || !category || !body) {
       return NextResponse.json(
@@ -104,7 +113,13 @@ export async function POST(request: Request) {
     const { data, error } = await admin.from('articles').insert(row).select('id, slug, title, created_at').single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      const msg = error.message || 'Database insert failed';
+      const hint =
+        msg.includes('does not exist') || msg.includes('column') || msg.includes('constraint')
+          ? ' Run all migrations in supabase/migrations (or RUN_THIS_IN_SUPABASE.sql + 007, 010) in Supabase SQL Editor.'
+          : '';
+      console.error('Article POST insert error', error);
+      return NextResponse.json({ error: msg + hint }, { status: 500 });
     }
     return NextResponse.json(data);
   } catch (e) {
