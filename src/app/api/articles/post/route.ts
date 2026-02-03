@@ -63,7 +63,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
-    const admin = getSupabaseAdmin();
+    let admin;
+    try {
+      admin = getSupabaseAdmin();
+    } catch (envErr) {
+      console.error('Article POST: Supabase not configured', envErr);
+      return NextResponse.json(
+        { error: 'Database not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel.' },
+        { status: 500 }
+      );
+    }
     const baseSlug = slug && slug.trim() ? slugify(slug) : slugify(title);
     let slugToUse = baseSlug;
     let attempt = 1;
@@ -99,6 +108,8 @@ export async function POST(request: Request) {
     }
     return NextResponse.json(data);
   } catch (e) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    console.error('Article POST error', e);
+    const msg = e instanceof Error ? e.message : 'Invalid request body';
+    return NextResponse.json({ error: msg }, { status: 400 });
   }
 }

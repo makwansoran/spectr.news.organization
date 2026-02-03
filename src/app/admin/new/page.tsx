@@ -45,6 +45,7 @@ export default function AdminNewArticlePage() {
       const res = await fetch('/api/articles/post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           title,
           subheadline: subheadline || null,
@@ -61,10 +62,11 @@ export default function AdminNewArticlePage() {
           homepage_section: homepageSection || null,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus('error');
-        setMessage(data.error || 'Failed to create article');
+        const errMsg = data?.error || `Failed to create article (${res.status})`;
+        setMessage(errMsg);
         return;
       }
       setStatus('success');
