@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "push": "git add -A && git status && git push origin master",
+    "deploy": "npm run push && npx vercel --prod"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

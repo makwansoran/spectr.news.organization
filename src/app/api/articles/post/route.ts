@@ -1,8 +1,22 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { verifyEditorSession, EDITOR_COOKIE_NAME } from '@/lib/auth';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import type { Category, Database } from '@/types';
 
 type ArticleInsert = Database['public']['Tables']['articles']['Insert'];
+
+async function requireEditor() {
+  const cookieStore = cookies();
+  const cookieValue = cookieStore.get(EDITOR_COOKIE_NAME)?.value;
+  if (!(await verifyEditorSession(cookieValue))) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Log in at Editor’s Desk first.' },
+      { status: 401 }
+    );
+  }
+  return null;
+}
 
 function slugify(text: string): string {
   return text
@@ -14,6 +28,9 @@ function slugify(text: string): string {
 }
 
 export async function POST(request: Request) {
+  const authErr = await requireEditor();
+  if (authErr) return authErr;
+
   try {
     const payload = await request.json();
     const {

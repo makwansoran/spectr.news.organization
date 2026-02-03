@@ -27,6 +27,7 @@ export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<ArticleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
 
   useEffect(() => {
@@ -78,6 +79,24 @@ export default function AdminArticlesPage() {
       }
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const deleteArticle = async (id: string, title: string) => {
+    if (!confirm(`Delete “${title}”? This cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/articles/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (res.ok) {
+        setArticles((prev) => prev.filter((a) => a.id !== id));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Delete failed');
+      }
+    } catch {
+      alert('Delete failed');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -210,14 +229,32 @@ export default function AdminArticlesPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/news/${a.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-medium text-globalist-gray-600 hover:text-globalist-black hover:underline"
-                    >
-                      View
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/admin/articles/${a.id}/edit`}
+                        className="text-xs font-medium text-bloomberg-blue hover:underline"
+                      >
+                        Edit
+                      </Link>
+                      <span className="text-globalist-gray-300">|</span>
+                      <Link
+                        href={`/news/${a.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-medium text-globalist-gray-600 hover:text-globalist-black hover:underline"
+                      >
+                        View
+                      </Link>
+                      <span className="text-globalist-gray-300">|</span>
+                      <button
+                        type="button"
+                        onClick={() => deleteArticle(a.id, a.title)}
+                        disabled={deletingId === a.id}
+                        className="text-xs font-medium text-red-600 hover:underline disabled:opacity-50"
+                      >
+                        {deletingId === a.id ? 'Deleting…' : 'Delete'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
