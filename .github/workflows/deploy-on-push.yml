@@ -1,16 +1,36 @@
-# Trigger Vercel deploy when we push to master (use if Vercel Git auto-deploy is broken)
-# Setup: 1) Vercel → Project → Settings → Git → Deploy Hooks → Create (branch: master) → copy URL
-#        2) GitHub → Repo → Settings → Secrets → Actions → New secret: VERCEL_DEPLOY_HOOK = that URL
-name: Trigger Vercel deploy on push
+# Every push to master triggers a Vercel deploy.
+#
+# Option A – Vercel Git (recommended): In Vercel → Project → Settings → Git,
+# connect this repo (spectr.news.organization) and set Production branch to "master".
+# Then every push to master deploys automatically; this Action is a backup.
+#
+# Option B – Deploy Hook only: In Vercel → Project → Settings → Git → Deploy Hooks,
+# create a hook for branch "master" and copy the URL. In GitHub → Repo → Settings →
+# Secrets and variables → Actions, add secret VERCEL_DEPLOY_HOOK = that URL.
+# This workflow will then trigger a deploy on every push to master.
+#
+name: Deploy to Vercel on push
 
 on:
   push:
     branches: [master]
+  workflow_dispatch: # Allow manual run from Actions tab
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Vercel deploy
-        if: secrets.VERCEL_DEPLOY_HOOK != ''
-        run: curl -sS -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+      - name: Trigger Vercel deploy via hook
+        run: |
+          if [ -z "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
+            echo "::warning::VERCEL_DEPLOY_HOOK is not set. Connect this repo in Vercel (Settings → Git) so pushes auto-deploy, or add VERCEL_DEPLOY_HOOK in GitHub Secrets (from Vercel → Deploy Hooks)."
+            exit 0
+          fi
+          res=$(curl -sS -w "%{http_code}" -o /tmp/vercel_out -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}")
+          if [ "$res" = "200" ] || [ "$res" = "201" ]; then
+            echo "Vercel deploy triggered successfully."
+          else
+            echo "Deploy hook returned HTTP $res"
+            cat /tmp/vercel_out || true
+            exit 1
+          fi
