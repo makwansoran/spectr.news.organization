@@ -185,6 +185,31 @@ export default function AdminNewArticlePage() {
                   }
                   setUploading(true);
                   try {
+                    if (!supabase) {
+                      if (f.size > 4 * 1024 * 1024) {
+                        setUploadError('File too large. Max 4MB when Supabase is not set in the browser. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel and redeploy for larger files.');
+                        return;
+                      }
+                      const form = new FormData();
+                      form.append('file', f);
+                      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.url) {
+                        setFeaturedImageUrl(data.url);
+                        return;
+                      }
+                      throw new Error(data.error || `Upload failed (${res.status})`);
+                    }
+                    if (f.size <= 4 * 1024 * 1024) {
+                      const form = new FormData();
+                      form.append('file', f);
+                      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.url) {
+                        setFeaturedImageUrl(data.url);
+                        return;
+                      }
+                    }
                     const urlRes = await fetch('/api/upload-url', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -192,28 +217,28 @@ export default function AdminNewArticlePage() {
                       credentials: 'include',
                     });
                     const urlData = await urlRes.json().catch(() => ({}));
+                    if (urlData?.useServerUpload && f.size <= 4 * 1024 * 1024) {
+                      const form = new FormData();
+                      form.append('file', f);
+                      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.url) {
+                        setFeaturedImageUrl(data.url);
+                        return;
+                      }
+                      throw new Error(data.error || `Upload failed (${res.status})`);
+                    }
+                    if (urlData?.useServerUpload) throw new Error('File too large. Max 4MB when Supabase URL is not set on the server.');
                     if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload path');
                     const { path: uploadPath, publicUrl } = urlData;
                     if (!uploadPath || !publicUrl) throw new Error('Invalid response');
-                    if (!supabase) throw new Error('Supabase not configured in browser');
                     const { error: uploadErr } = await supabase.storage
                       .from('uploads')
                       .upload(uploadPath, f, { contentType: f.type || 'image/jpeg', upsert: false });
                     if (uploadErr) throw new Error(uploadErr.message);
                     setFeaturedImageUrl(publicUrl);
                   } catch (err) {
-                    const msg = err instanceof Error ? err.message : 'Upload failed';
-                    if (f.size <= 4 * 1024 * 1024) {
-                      const form = new FormData();
-                      form.append('file', f);
-                      const fallback = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
-                      const fallbackData = await fallback.json().catch(() => ({}));
-                      if (fallback.ok && fallbackData.url) {
-                        setFeaturedImageUrl(fallbackData.url);
-                        return;
-                      }
-                    }
-                    setUploadError(msg);
+                    setUploadError(err instanceof Error ? err.message : 'Upload failed');
                   } finally {
                     setUploading(false);
                     e.target.value = '';
@@ -305,6 +330,31 @@ export default function AdminNewArticlePage() {
                   }
                   setAuthorAvatarUploading(true);
                   try {
+                    if (!supabase) {
+                      if (f.size > 4 * 1024 * 1024) {
+                        setAuthorAvatarError('File too large. Max 4MB. Add NEXT_PUBLIC_SUPABASE_* in Vercel and redeploy for larger files.');
+                        return;
+                      }
+                      const form = new FormData();
+                      form.append('file', f);
+                      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.url) {
+                        setAuthorAvatarUrl(data.url);
+                        return;
+                      }
+                      throw new Error(data.error || `Upload failed (${res.status})`);
+                    }
+                    if (f.size <= 4 * 1024 * 1024) {
+                      const form = new FormData();
+                      form.append('file', f);
+                      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.url) {
+                        setAuthorAvatarUrl(data.url);
+                        return;
+                      }
+                    }
                     const urlRes = await fetch('/api/upload-url', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -312,28 +362,28 @@ export default function AdminNewArticlePage() {
                       credentials: 'include',
                     });
                     const urlData = await urlRes.json().catch(() => ({}));
+                    if (urlData?.useServerUpload && f.size <= 4 * 1024 * 1024) {
+                      const form = new FormData();
+                      form.append('file', f);
+                      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.url) {
+                        setAuthorAvatarUrl(data.url);
+                        return;
+                      }
+                      throw new Error(data.error || `Upload failed (${res.status})`);
+                    }
+                    if (urlData?.useServerUpload) throw new Error('File too large. Max 4MB when Supabase URL is not set on the server.');
                     if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload path');
                     const { path: uploadPath, publicUrl } = urlData;
                     if (!uploadPath || !publicUrl) throw new Error('Invalid response');
-                    if (!supabase) throw new Error('Supabase not configured in browser');
                     const { error: uploadErr } = await supabase.storage
                       .from('uploads')
                       .upload(uploadPath, f, { contentType: f.type || 'image/jpeg', upsert: false });
                     if (uploadErr) throw new Error(uploadErr.message);
                     setAuthorAvatarUrl(publicUrl);
                   } catch (err) {
-                    const msg = err instanceof Error ? err.message : 'Upload failed';
-                    if (f.size <= 4 * 1024 * 1024) {
-                      const form = new FormData();
-                      form.append('file', f);
-                      const fallback = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
-                      const fallbackData = await fallback.json().catch(() => ({}));
-                      if (fallback.ok && fallbackData.url) {
-                        setAuthorAvatarUrl(fallbackData.url);
-                        return;
-                      }
-                    }
-                    setAuthorAvatarError(msg);
+                    setAuthorAvatarError(err instanceof Error ? err.message : 'Upload failed');
                   } finally {
                     setAuthorAvatarUploading(false);
                     e.target.value = '';

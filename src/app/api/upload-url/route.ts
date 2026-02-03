@@ -43,10 +43,7 @@ export async function POST(request: Request) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '');
     if (!supabaseUrl) {
-      return NextResponse.json(
-        { error: 'Storage not configured (NEXT_PUBLIC_SUPABASE_URL).' },
-        { status: 500 }
-      );
+      return NextResponse.json({ useServerUpload: true });
     }
 
     let contentType = 'image/jpeg';
