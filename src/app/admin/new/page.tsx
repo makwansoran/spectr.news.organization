@@ -164,9 +164,17 @@ export default function AdminNewArticlePage() {
             Featured image
           </label>
           <p className="mt-1 text-xs text-globalist-gray-500">
-            JPEG, PNG, GIF, WebP, SVG, BMP, AVIF, TIFF, ICO — max 10MB (direct to Supabase).
+            Paste an image URL or upload. URL works with any public image (Imgur, Unsplash, your CDN, etc.).
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-4">
+            <input
+              type="url"
+              value={featuredImageUrl}
+              onChange={(e) => { setFeaturedImageUrl(e.target.value); setUploadError(''); }}
+              className="flex-1 min-w-0 rounded border border-globalist-gray-300 px-3 py-2 text-globalist-black focus:border-bloomberg-blue focus:outline-none focus:ring-1 focus:ring-bloomberg-blue"
+              placeholder="https://example.com/image.jpg"
+            />
+            <span className="text-globalist-gray-400">or</span>
             <label className="cursor-pointer rounded border border-globalist-gray-300 bg-white px-3 py-2 text-sm font-medium text-globalist-gray-700 hover:bg-globalist-gray-50 focus-within:ring-2 focus-within:ring-bloomberg-blue">
               {uploading ? 'Uploading…' : 'Upload image'}
               <input
