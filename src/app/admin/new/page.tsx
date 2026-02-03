@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import { supabase } from '@/lib/supabase';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
@@ -191,17 +192,28 @@ export default function AdminNewArticlePage() {
                       credentials: 'include',
                     });
                     const urlData = await urlRes.json().catch(() => ({}));
-                    if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload URL');
-                    const { signedUrl, publicUrl } = urlData;
-                    if (!signedUrl || !publicUrl) throw new Error('Invalid upload URL response');
-                    const putForm = new FormData();
-                    putForm.append('cacheControl', '3600');
-                    putForm.append('', f);
-                    const putRes = await fetch(signedUrl, { method: 'PUT', body: putForm });
-                    if (!putRes.ok) throw new Error(`Upload failed (${putRes.status})`);
+                    if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload path');
+                    const { path: uploadPath, publicUrl } = urlData;
+                    if (!uploadPath || !publicUrl) throw new Error('Invalid response');
+                    if (!supabase) throw new Error('Supabase not configured in browser');
+                    const { error: uploadErr } = await supabase.storage
+                      .from('uploads')
+                      .upload(uploadPath, f, { contentType: f.type || 'image/jpeg', upsert: false });
+                    if (uploadErr) throw new Error(uploadErr.message);
                     setFeaturedImageUrl(publicUrl);
                   } catch (err) {
-                    setUploadError(err instanceof Error ? err.message : 'Upload failed');
+                    const msg = err instanceof Error ? err.message : 'Upload failed';
+                    if (f.size <= 4 * 1024 * 1024) {
+                      const form = new FormData();
+                      form.append('file', f);
+                      const fallback = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const fallbackData = await fallback.json().catch(() => ({}));
+                      if (fallback.ok && fallbackData.url) {
+                        setFeaturedImageUrl(fallbackData.url);
+                        return;
+                      }
+                    }
+                    setUploadError(msg);
                   } finally {
                     setUploading(false);
                     e.target.value = '';
@@ -300,17 +312,28 @@ export default function AdminNewArticlePage() {
                       credentials: 'include',
                     });
                     const urlData = await urlRes.json().catch(() => ({}));
-                    if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload URL');
-                    const { signedUrl, publicUrl } = urlData;
-                    if (!signedUrl || !publicUrl) throw new Error('Invalid upload URL response');
-                    const putForm = new FormData();
-                    putForm.append('cacheControl', '3600');
-                    putForm.append('', f);
-                    const putRes = await fetch(signedUrl, { method: 'PUT', body: putForm });
-                    if (!putRes.ok) throw new Error(`Upload failed (${putRes.status})`);
+                    if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload path');
+                    const { path: uploadPath, publicUrl } = urlData;
+                    if (!uploadPath || !publicUrl) throw new Error('Invalid response');
+                    if (!supabase) throw new Error('Supabase not configured in browser');
+                    const { error: uploadErr } = await supabase.storage
+                      .from('uploads')
+                      .upload(uploadPath, f, { contentType: f.type || 'image/jpeg', upsert: false });
+                    if (uploadErr) throw new Error(uploadErr.message);
                     setAuthorAvatarUrl(publicUrl);
                   } catch (err) {
-                    setAuthorAvatarError(err instanceof Error ? err.message : 'Upload failed');
+                    const msg = err instanceof Error ? err.message : 'Upload failed';
+                    if (f.size <= 4 * 1024 * 1024) {
+                      const form = new FormData();
+                      form.append('file', f);
+                      const fallback = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
+                      const fallbackData = await fallback.json().catch(() => ({}));
+                      if (fallback.ok && fallbackData.url) {
+                        setAuthorAvatarUrl(fallbackData.url);
+                        return;
+                      }
+                    }
+                    setAuthorAvatarError(msg);
                   } finally {
                     setAuthorAvatarUploading(false);
                     e.target.value = '';

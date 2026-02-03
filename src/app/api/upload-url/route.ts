@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyEditorSession, EDITOR_COOKIE_NAME } from '@/lib/auth';
-import { getSupabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
@@ -28,8 +27,8 @@ function safeFilename(contentType: string): string {
 }
 
 /**
- * Returns a signed upload URL so the browser can upload directly to Supabase.
- * This avoids "Method Not Allowed" from server-side upload and bypasses body size limits.
+ * Returns a path and publicUrl for direct browser upload.
+ * No Supabase call on the server — client uploads with anon key and RLS allows INSERT.
  */
 export async function POST(request: Request) {
   try {
@@ -42,11 +41,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !serviceKey) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '');
+    if (!supabaseUrl) {
       return NextResponse.json(
-        { error: 'Storage not configured.' },
+        { error: 'Storage not configured (NEXT_PUBLIC_SUPABASE_URL).' },
         { status: 500 }
       );
     }
@@ -61,38 +59,10 @@ export async function POST(request: Request) {
       // use default
     }
 
-    const filename = safeFilename(contentType);
-    const supabase = getSupabaseAdmin();
+    const path = safeFilename(contentType);
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${path}`;
 
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .createSignedUploadUrl(filename);
-
-    if (error) {
-      console.error('Upload URL: createSignedUploadUrl failed', error);
-      return NextResponse.json(
-        { error: error.message || 'Could not create upload URL' },
-        { status: 500 }
-      );
-    }
-
-    if (!data?.signedUrl || !data?.path) {
-      return NextResponse.json(
-        { error: 'No signed URL returned' },
-        { status: 500 }
-      );
-    }
-
-    const { data: urlData } = supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(data.path);
-
-    return NextResponse.json({
-      signedUrl: data.signedUrl,
-      path: data.path,
-      token: data.token,
-      publicUrl: urlData.publicUrl,
-    });
+    return NextResponse.json({ path, publicUrl });
   } catch (e) {
     console.error('Upload URL error', e);
     return NextResponse.json(
