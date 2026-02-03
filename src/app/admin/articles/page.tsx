@@ -87,7 +87,7 @@ export default function AdminArticlesPage() {
     articles: articles.filter((a) => (a.homepage_section || '') === value),
   }));
 
-  const categories = ['', 'politics', 'economy', 'finance', 'companies', 'breaking'];
+  const categories = ['', 'politics', 'economy', 'finance', 'trade', 'companies', 'breaking'];
 
   return (
     <div>

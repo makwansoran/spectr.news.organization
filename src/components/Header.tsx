@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { href: '/politics', label: 'POLITICS' },
   { href: '/economy', label: 'ECONOMY' },
   { href: '/trade', label: 'TRADE' },
-  { href: '/companies', label: 'TECHNOLOGY' },
+  { href: '/companies', label: 'COMPANIES' },
 ];
 
 export function Header() {
