@@ -5,7 +5,8 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
-const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+// Vercel serverless request body limit is 4.5MB — keep under that
+const MAX_SIZE = 4 * 1024 * 1024; // 4MB
 const BUCKET = 'uploads';
 
 // Broad set of image MIME types (most file types for images)
@@ -63,7 +64,7 @@ function isAllowedFile(file: File): { ok: true } | { ok: false; error: string } 
   if (file.size > MAX_SIZE) {
     return {
       ok: false,
-      error: `File too large. Maximum size is ${MAX_SIZE / 1024 / 1024}MB.`,
+      error: `File too large. Max ${MAX_SIZE / 1024 / 1024}MB (Vercel limit).`,
     };
   }
   return { ok: true };
@@ -74,7 +75,10 @@ export async function POST(request: Request) {
     const cookieStore = cookies();
     const cookieValue = cookieStore.get(EDITOR_COOKIE_NAME)?.value;
     if (!(await verifyEditorSession(cookieValue))) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized. Log in at Editor’s Desk first.' },
+        { status: 401 }
+      );
     }
 
     const formData = await request.formData();
@@ -98,7 +102,17 @@ export async function POST(request: Request) {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (supabaseUrl && serviceKey) {
-      const supabase = getSupabaseAdmin();
+      let supabase;
+      try {
+        supabase = getSupabaseAdmin();
+      } catch (envErr) {
+        console.error('Upload: Supabase admin init failed', envErr);
+        return NextResponse.json(
+          { error: 'Storage not configured. Set SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SUPABASE_URL in Vercel.' },
+          { status: 500 }
+        );
+      }
+
       const opts = {
         contentType: file.type || 'application/octet-stream',
         upsert: false,
@@ -122,8 +136,12 @@ export async function POST(request: Request) {
 
       if (error) {
         console.error('Upload: storage upload failed', error);
+        const msg = error.message || 'Upload failed';
+        const hint = msg.toLowerCase().includes('row-level security') || msg.toLowerCase().includes('policy')
+          ? ' Run the SQL in Supabase Dashboard → SQL Editor: supabase/migrations/009_storage_uploads_policy.sql'
+          : '';
         return NextResponse.json(
-          { error: error.message || 'Upload failed' },
+          { error: msg + hint },
           { status: 500 }
         );
       }
