@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const validCategories: Category[] = ['politics', 'finance', 'economy', 'companies', 'breaking'];
+    const validCategories: Category[] = ['politics', 'finance', 'economy', 'companies', 'breaking', 'trade'];
     if (!validCategories.includes(category)) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }

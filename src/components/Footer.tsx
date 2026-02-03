@@ -13,6 +13,7 @@ export function Footer() {
             <Link href="/politics" className="hover:text-bloomberg-blue">Politics</Link>
             <Link href="/finance" className="hover:text-bloomberg-blue">Finance</Link>
             <Link href="/economy" className="hover:text-bloomberg-blue">Economy</Link>
+            <Link href="/trade" className="hover:text-bloomberg-blue">Trade</Link>
             <Link href="/companies" className="hover:text-bloomberg-blue">Companies</Link>
             <Link href="/subscribe" className="hover:text-bloomberg-blue">Subscribe</Link>
             <Link href="/admin" className="hover:text-bloomberg-blue">Editor&apos;s Desk</Link>

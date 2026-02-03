@@ -10,6 +10,7 @@ const CATEGORIES = [
   { value: 'politics', label: 'Politics' },
   { value: 'finance', label: 'Finance' },
   { value: 'economy', label: 'Economy' },
+  { value: 'trade', label: 'Trade' },
   { value: 'companies', label: 'Companies' },
   { value: 'breaking', label: 'Breaking' },
 ] as const;

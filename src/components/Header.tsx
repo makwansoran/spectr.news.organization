@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: '/', label: 'HOME' },
   { href: '/politics', label: 'POLITICS' },
   { href: '/economy', label: 'ECONOMY' },
+  { href: '/trade', label: 'TRADE' },
   { href: '/companies', label: 'TECHNOLOGY' },
 ];
 

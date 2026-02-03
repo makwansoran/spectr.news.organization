@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export type Category = 'politics' | 'finance' | 'economy' | 'companies' | 'breaking';
+export type Category = 'politics' | 'finance' | 'economy' | 'companies' | 'breaking' | 'trade';
 
 export type HomepageSection =
   | 'featured'
