@@ -163,7 +163,7 @@ export default function AdminNewArticlePage() {
             Featured image
           </label>
           <p className="mt-1 text-xs text-globalist-gray-500">
-            JPEG, PNG, GIF, WebP, SVG, BMP, AVIF, TIFF, ICO — max 4MB.
+            JPEG, PNG, GIF, WebP, SVG, BMP, AVIF, TIFF, ICO — max 10MB (direct to Supabase).
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-4">
             <label className="cursor-pointer rounded border border-globalist-gray-300 bg-white px-3 py-2 text-sm font-medium text-globalist-gray-700 hover:bg-globalist-gray-50 focus-within:ring-2 focus-within:ring-bloomberg-blue">
@@ -177,28 +177,29 @@ export default function AdminNewArticlePage() {
                   const f = e.target.files?.[0];
                   if (!f) return;
                   setUploadError('');
-                  if (f.size > 4 * 1024 * 1024) {
-                    setUploadError('File too large. Maximum size is 4MB.');
+                  if (f.size > 10 * 1024 * 1024) {
+                    setUploadError('File too large. Maximum size is 10MB.');
                     e.target.value = '';
                     return;
                   }
                   setUploading(true);
                   try {
-                    const form = new FormData();
-                    form.append('file', f);
-                    const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
-                    let data: { error?: string; url?: string };
-                    try {
-                      data = await res.json();
-                    } catch {
-                      data = {};
-                    }
-                    if (res.status === 413) {
-                      setUploadError('File too large. Use an image under 4MB.');
-                      return;
-                    }
-                    if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
-                    if (data.url) setFeaturedImageUrl(data.url);
+                    const urlRes = await fetch('/api/upload-url', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ contentType: f.type || 'image/jpeg' }),
+                      credentials: 'include',
+                    });
+                    const urlData = await urlRes.json().catch(() => ({}));
+                    if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload URL');
+                    const { signedUrl, publicUrl } = urlData;
+                    if (!signedUrl || !publicUrl) throw new Error('Invalid upload URL response');
+                    const putForm = new FormData();
+                    putForm.append('cacheControl', '3600');
+                    putForm.append('', f);
+                    const putRes = await fetch(signedUrl, { method: 'PUT', body: putForm });
+                    if (!putRes.ok) throw new Error(`Upload failed (${putRes.status})`);
+                    setFeaturedImageUrl(publicUrl);
                   } catch (err) {
                     setUploadError(err instanceof Error ? err.message : 'Upload failed');
                   } finally {
@@ -285,28 +286,29 @@ export default function AdminNewArticlePage() {
                   const f = e.target.files?.[0];
                   if (!f) return;
                   setAuthorAvatarError('');
-                  if (f.size > 4 * 1024 * 1024) {
-                    setAuthorAvatarError('File too large. Maximum size is 4MB.');
+                  if (f.size > 10 * 1024 * 1024) {
+                    setAuthorAvatarError('File too large. Maximum size is 10MB.');
                     e.target.value = '';
                     return;
                   }
                   setAuthorAvatarUploading(true);
                   try {
-                    const form = new FormData();
-                    form.append('file', f);
-                    const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'include' });
-                    let data: { error?: string; url?: string };
-                    try {
-                      data = await res.json();
-                    } catch {
-                      data = {};
-                    }
-                    if (res.status === 413) {
-                      setAuthorAvatarError('File too large. Use an image under 4MB.');
-                      return;
-                    }
-                    if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
-                    if (data.url) setAuthorAvatarUrl(data.url);
+                    const urlRes = await fetch('/api/upload-url', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ contentType: f.type || 'image/jpeg' }),
+                      credentials: 'include',
+                    });
+                    const urlData = await urlRes.json().catch(() => ({}));
+                    if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload URL');
+                    const { signedUrl, publicUrl } = urlData;
+                    if (!signedUrl || !publicUrl) throw new Error('Invalid upload URL response');
+                    const putForm = new FormData();
+                    putForm.append('cacheControl', '3600');
+                    putForm.append('', f);
+                    const putRes = await fetch(signedUrl, { method: 'PUT', body: putForm });
+                    if (!putRes.ok) throw new Error(`Upload failed (${putRes.status})`);
+                    setAuthorAvatarUrl(publicUrl);
                   } catch (err) {
                     setAuthorAvatarError(err instanceof Error ? err.message : 'Upload failed');
                   } finally {
